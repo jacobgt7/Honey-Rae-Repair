@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import "./tickets.css"
 
-export const TicketList = () => {
+export const TicketList = ({ searchTerms }) => {
     const [tickets, setTickets] = useState([])
     const [filteredTickets, setFilteredTickets] = useState([])
     const [emergency, setEmergency] = useState(false)
@@ -22,6 +22,15 @@ export const TicketList = () => {
         },
         [] // When this array is empty, you are observing initial component state
     )
+
+    useEffect(
+        () => {
+            const searchResults = tickets.filter(ticket => ticket.description.toLowerCase().includes(searchTerms.toLowerCase()))
+            setFilteredTickets(searchResults)
+        },
+        [searchTerms]
+    )
+
 
     useEffect(
         () => {
