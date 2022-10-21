@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, Link } from "react-router-dom"
+import { Ticket } from "./Ticket"
 import "./tickets.css"
 
 export const TicketList = ({ searchTerms }) => {
@@ -7,20 +8,34 @@ export const TicketList = ({ searchTerms }) => {
     const [filteredTickets, setFilteredTickets] = useState([])
     const [emergency, setEmergency] = useState(false)
     const [openOnly, setOpenOnly] = useState(false)
+    const [employees, setEmployees] = useState([])
     const navigate = useNavigate()
 
     const localHoneyUser = localStorage.getItem("honey_user")
     const honeyUserObject = JSON.parse(localHoneyUser)
 
+    const fetchTickets = () => {
+        fetch("http://localhost:8088/serviceTickets?_embed=employeeTickets")
+            .then(res => res.json())
+            .then((fethcedTickets) => {
+                setTickets(fethcedTickets)
+            })
+
+    }
+
     useEffect(
         () => {
-            fetch("http://localhost:8088/serviceTickets")
+
+            fetchTickets()
+
+            fetch(`http://localhost:8088/employees?_expand=user`)
                 .then(res => res.json())
-                .then((fethcedTickets) => {
-                    setTickets(fethcedTickets)
+                .then((employeeData) => {
+                    setEmployees(employeeData)
                 })
+
         },
-        [] // When this array is empty, you are observing initial component state
+        []
     )
 
     useEffect(
@@ -94,10 +109,10 @@ export const TicketList = ({ searchTerms }) => {
         <article className="tickets">
             {
                 filteredTickets.map(ticket => {
-                    return <section className="ticket" key={ticket.id}>
-                        <header>{ticket.description}</header>
-                        <footer>Emergency: {ticket.emergency ? "Yes" : "No"}</footer>
-                    </section>
+                    return <Ticket ticket={ticket}
+                        currentUser={honeyUserObject}
+                        employees={employees}
+                        fetchTickets={fetchTickets} />
                 })
             }
         </article>

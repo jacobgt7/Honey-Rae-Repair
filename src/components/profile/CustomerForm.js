@@ -22,7 +22,37 @@ export const CustomerForm = () => {
         []
     )
 
+    const [feedback, setFeedback] = useState("")
+
+    useEffect(() => {
+        if (feedback !== "") {
+            // Clear feedback to make entire element disappear after 3 seconds
+            setTimeout(() => setFeedback(""), 3000);
+        }
+    }, [feedback])
+
+    const handleSaveButtonClick = (event) => {
+        event.preventDefault()
+
+        fetch(`http://localhost:8088/customers/${profile.id}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(profile)
+        }
+        )
+            .then(res => res.json())
+            .then(() => {
+                setFeedback("Customer profile successfully saved")
+            })
+    }
+
+
     return <>
+        <div className={`${feedback.includes("Error") ? "error" : "feedback"} ${feedback === "" ? "invisible" : "visible"}`}>
+            {feedback}
+        </div>
         <form className="profile">
             <h2 className="profile__title">Profile</h2>
             <fieldset>
@@ -46,6 +76,7 @@ export const CustomerForm = () => {
                 <div className="form-group">
                     <label htmlFor="phoneNumber">Phone Number:</label>
                     <input type="text"
+                        required
                         className="form-control"
                         value={profile.phoneNumber}
                         onChange={
